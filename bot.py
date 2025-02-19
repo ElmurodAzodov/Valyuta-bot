@@ -2,46 +2,34 @@ import logging
 import aiohttp
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums import ParseMode
-from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 import asyncio
-import os
 
-
-API_TOKEN = '8048673552:AAEP09_Nx3zRoEApaK9FHs2HdXovSEVpSOk'
-ACCESS_KEY = '98ce7a4dd8ffd8f84e634290aad04170'
+# Bot va Dispatcher sozlamalari
+API_TOKEN = "8048673552:AAEP09_Nx3zRoEApaK9FHs2HdXovSEVpSOk"
+ACCESS_KEY = "98ce7a4dd8ffd8f84e634290aad04170"
 API_URL = "https://api.exchangerate.host/convert"
 
-# Botni sozlash
 logging.basicConfig(level=logging.INFO)
-bot = Bot(
-    token=API_TOKEN,
-    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
-)
+bot = Bot(token=API_TOKEN, parse_mode=ParseMode.HTML)
 dp = Dispatcher()
 
-# Pastki tugmachalar (doimiy tugmalar)
+# Klaviatura tugmalari
 def get_main_keyboard():
-    keyboard = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="/start"), KeyboardButton(text="/clear"), KeyboardButton(text="/history")]
-        ],
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="/start"), KeyboardButton(text="/clear"), KeyboardButton(text="/history")]],
         resize_keyboard=True
     )
-    return keyboard
 
-# Til tanlash tugmalari
 def get_language_keyboard():
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🇺🇿 O'zbek", callback_data='lang_uz')],
         [InlineKeyboardButton(text="🇬🇧 English", callback_data='lang_en')],
         [InlineKeyboardButton(text="🇷🇺 Русский", callback_data='lang_ru')],
         [InlineKeyboardButton(text="🇰🇷 한국어", callback_data='lang_ko')]
     ])
-    return keyboard
 
-# Valyutalar ro'yxati
 currencies = ["USD", "EUR", "RUB", "UZS", "GBP", "CNY", "JPY", "KZT", "CHF", "CAD", "AUD", "TRY", "INR", "SGD", "HKD", "BRL", "MXN", "NOK"]
 
 def get_currency_keyboard():
@@ -56,7 +44,7 @@ user_languages = {}
 user_currencies = {}
 user_history = {}
 
-# Start komandasi
+# /start komandasi
 @dp.message(Command("start"))
 async def start(message: types.Message):
     await message.answer(
@@ -123,24 +111,12 @@ async def convert(message: types.Message):
                     }
                     await message.answer(messages[lang])
                 else:
-                    error_messages = {
-                        'uz': "Xato: Valyuta kurslarini olishning imkoni bo'lmadi.",
-                        'en': "Error: Failed to fetch exchange rates.",
-                        'ru': "Ошибка: Не удалось получить курсы валют.",
-                        'ko': "오류: 환율을 가져올 수 없습니다."
-                    }
-                    await message.answer(error_messages[lang])
+                    await message.answer("Xatolik: Valyuta kurslarini olishning imkoni bo‘lmadi.")
     except Exception as e:
-        error_messages = {
-            'uz': "Xato: Iltimos, to'g'ri formatda so'rov yuboring.",
-            'en': "Error: Please send the request in the correct format.",
-            'ru': "Ошибка: Пожалуйста, отправьте запрос в правильном формате.",
-            'ko': "오류: 올바른 형식으로 요청을 보내주세요."
-        }
-        await message.answer(error_messages[lang])
+        await message.answer("Xato: Iltimos, to‘g‘ri formatda so‘rov yuboring.")
         logging.error(f"Xatolik: {e}")
 
-# Clear komandasi
+# /clear komandasi
 @dp.message(Command("clear"))
 async def clear(message: types.Message):
     user_languages.pop(message.from_user.id, None)
@@ -148,14 +124,11 @@ async def clear(message: types.Message):
     user_history.pop(message.from_user.id, None)
     await message.answer("Ma'lumotlaringiz tozalandi. /start buyrug'ini bosing.", reply_markup=get_main_keyboard())
 
-# History komandasi
+# /history komandasi
 @dp.message(Command("history"))
 async def history(message: types.Message):
     history = user_history.get(message.from_user.id, [])
-    if history:
-        await message.answer("\n".join(history))
-    else:
-        await message.answer("Siz hali hech qanday konvertatsiya qilmadingiz.")
+    await message.answer("\n".join(history) if history else "Siz hali hech qanday konvertatsiya qilmadingiz.")
 
 async def main():
     await dp.start_polling(bot)
