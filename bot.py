@@ -42,7 +42,8 @@ def get_language_keyboard():
     return keyboard
 
 # Valyutalar ro'yxati
-currencies = ["USD", "EUR", "RUB", "UZS", "GBP", "CNY", "JPY", "KZT", "CHF", "CAD", "AUD", "TRY", "INR", "SGD", "HKD", "BRL", "MXN", "NOK"]
+currencies = ["USD", "EUR", "RUB", "UZS", "KRW", "GBP", "CNY", "JPY", "KZT", "CHF", "CAD", "AUD", "TRY", "INR", "SGD", "HKD", "BRL", "MXN"]
+
 
 def get_currency_keyboard():
     keyboard = InlineKeyboardBuilder()
